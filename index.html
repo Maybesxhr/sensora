@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sensora // By Pete1Tap - Pro Sensitivity Calibration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #090b10;
+      --bg-surface: #11141c;
+      --bg-card: #161b26;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --accent-val: #ff4655;
+      --accent-cs: #00e5ff;
+      --accent-pete: #f59e0b;
+      --accent-glow: rgba(255, 70, 85, 0.35);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 16px;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(255, 70, 85, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(0, 229, 255, 0.05) 0%, transparent 40%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 860px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+    }
+
+    .header {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 20px;
+    }
+    .header-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-creator {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-pete);
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+    .badge-engine {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      background: rgba(255, 70, 85, 0.15);
+      color: var(--accent-val);
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 70, 85, 0.3);
+    }
+    .subtitle { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+    /* Modern Slider Switch for Language */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 4px 8px;
+      border-radius: 99px;
+      border: 1px solid var(--border-subtle);
+      user-select: none;
+    }
+    .switch-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.25s ease;
+    }
+    .switch-label.active { color: #fff; }
+    .switch-box {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .switch-box.checked {
+      background: var(--accent-val);
+      box-shadow: 0 0 12px rgba(255, 70, 85, 0.4);
+    }
+    .switch-knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .switch-box.checked .switch-knob { transform: translateX(20px); }
+
+    /* Inputs Grid */
+    .grid-inputs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .input-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .input-field input, .input-field select {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .input-field input:focus, .input-field select:focus {
+      border-color: var(--accent-val);
+      box-shadow: 0 0 0 3px rgba(255, 70, 85, 0.15);
+    }
+
+    /* Grip Selection */
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .grip-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+    .grip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .grip-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .grip-card.active {
+      border-color: var(--accent-val);
+      background: rgba(255, 70, 85, 0.05);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+    .grip-card svg {
+      width: 100%;
+      height: 76px;
+      margin-bottom: 10px;
+    }
+    .grip-name { font-size: 14px; font-weight: 600; color: #fff; }
+    .grip-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Action Button */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #ff4655 0%, #d82b3a 100%);
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 25px rgba(255, 70, 85, 0.3);
+    }
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(255, 70, 85, 0.45);
+    }
+
+    /* Drill Arena */
+    .test-box {
+      margin-top: 28px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 24px;
+      display: none;
+    }
+    .arena-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 99px;
+      background: rgba(255, 70, 85, 0.15);
+      color: var(--accent-val);
+      border: 1px solid rgba(255, 70, 85, 0.3);
+    }
+    .status-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 14px;
+      color: #fff;
+    }
+    #canvas {
+      width: 100%;
+      height: 320px;
+      background: #080a0f;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      cursor: crosshair;
+      display: block;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 4px;
+      background: var(--bg-card);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-cs);
+      transition: width 0.1s linear;
+    }
+
+    /* Results Dashboard */
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 28px;
+      display: none;
+      box-shadow: 0 12px 30px rgba(0, 229, 255, 0.08);
+    }
+    .result-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent-cs);
+      margin-bottom: 16px;
+    }
+    .results-matrix {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .matrix-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .matrix-box .label { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+    .matrix-box .value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: #fff; margin-top: 4px; }
+    .matrix-box .val-val { color: var(--accent-val); }
+    .matrix-box .val-cs { color: var(--accent-cs); }
+    
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13px;
+    }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-row span:first-child { color: var(--text-muted); }
+
+    /* Footer Reference */
+    .credits-footer {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .credits-footer a {
+      color: var(--text-main);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .credits-footer a:hover {
+      color: var(--accent-cs);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-title-wrap">
+      <div class="brand-row">
+        <h1>Sensora</h1>
+        <span class="badge-creator">By Pete1Tap</span>
+        <span class="badge-engine" id="tagEngine">5-Stage Engine</span>
+      </div>
+      <p class="subtitle" id="subTitle">ระบบวิเคราะห์ Sensitivity เฉพาะบุคคลด้วยฮาร์ดแวร์และการทดสอบ 5 มิติ</p>
+    </div>
+    
+    <!-- Modern Toggle Switch -->
+    <div class="switch-container">
+      <span class="switch-label active" id="lbl-th" onclick="toggleLanguage(false)">TH</span>
+      <div class="switch-box" id="langSwitch" onclick="toggleLanguage()">
+        <div class="switch-knob"></div>
+      </div>
+      <span class="switch-label" id="lbl-en" onclick="toggleLanguage(true)">EN</span>
+    </div>
+  </div>
+
+  <div class="grid-inputs">
+    <div class="input-field">
+      <label id="lblDpi">Mouse DPI</label>
+      <input type="number" id="dpi" value="800" />
+    </div>
+
+    <!-- Aiming Pivot Style Selection (แขน / ข้อมือ / ไฮบริด) -->
+    <div class="input-field">
+      <label id="lblPivot">การใช้แขน / ข้อมือ (Pivot Style)</label>
+      <select id="aimPivot">
+        <option value="arm">Arm Aiming (ใช้ท่อนแขน - นิ่ง แน่น)</option>
+        <option value="hybrid" selected>Hybrid (แขนมุมกว้าง + ข้อมือสะบัด)</option>
+        <option value="wrist">Wrist Aiming (ข้อมือล้วน - คล่องตัว)</option>
+      </select>
+    </div>
+
+    <div class="input-field">
+      <label id="lblGame">เกมหลักที่ต้องการตั้งค่า</label>
+      <select id="primaryGame">
+        <option value="val">VALORANT (Micro-Aim / First Bullet)</option>
+        <option value="cs">CS2 (Recoil Spray / Dynamic Strafe)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="section-title" id="lblGrip">เลือกลักษณะการจับเมาส์ (Mouse Grip):</div>
+  <div class="grip-grid">
+    <!-- Fingertip -->
+    <div class="grip-card" id="card-fingertip" onclick="selectGrip('fingertip')">
+      <svg viewBox="0 0 160 90" fill="none" stroke="currentColor">
+        <path d="M 15 65 C 35 40, 85 40, 125 60 L 135 65 L 15 65 Z" stroke="#334155" fill="#0f172a" stroke-width="1.5"/>
+        <path d="M 25 62 L 40 38 C 50 38, 55 50, 70 54 C 90 58, 110 58, 140 72" stroke="var(--accent-val)" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="40" cy="38" r="3.5" fill="var(--accent-val)"/>
+        <circle cx="70" cy="54" r="3.5" fill="var(--accent-val)"/>
+      </svg>
+      <div class="grip-name" id="gripNameFingertip">Fingertip Grip</div>
+      <div class="grip-desc" id="gripDescFingertip">ปลายนิ้วสัมผัสล้วน ฝ่ามือลอย สะบัดไว</div>
+    </div>
+
+    <!-- Claw -->
+    <div class="grip-card active" id="card-claw" onclick="selectGrip('claw')">
+      <svg viewBox="0 0 160 90" fill="none" stroke="currentColor">
+        <path d="M 15 65 C 35 40, 85 40, 125 60 L 135 65 L 15 65 Z" stroke="#334155" fill="#0f172a" stroke-width="1.5"/>
+        <path d="M 30 65 L 35 36 C 40 22, 55 22, 65 42 C 80 50, 105 50, 138 72" stroke="var(--accent-val)" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="35" cy="36" r="3.5" fill="var(--accent-val)"/>
+        <path d="M 108 58 C 114 58, 118 63, 122 68" stroke="var(--accent-val)" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="grip-name" id="gripNameClaw">Claw Grip</div>
+      <div class="grip-desc" id="gripDescClaw">นิ้วงอแตะ โคนฝ่ามือประคอง สมดุล</div>
+    </div>
+
+    <!-- Palm -->
+    <div class="grip-card" id="card-palm" onclick="selectGrip('palm')">
+      <svg viewBox="0 0 160 90" fill="none" stroke="currentColor">
+        <path d="M 15 65 C 35 40, 85 40, 125 60 L 135 65 L 15 65 Z" stroke="#334155" fill="#0f172a" stroke-width="1.5"/>
+        <path d="M 22 62 C 32 44, 60 42, 88 46 C 112 50, 128 60, 138 70" stroke="var(--accent-val)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="32" cy="45" r="3.5" fill="var(--accent-val)"/>
+        <circle cx="75" cy="44" r="3.5" fill="var(--accent-val)"/>
+        <circle cx="115" cy="54" r="3.5" fill="var(--accent-val)"/>
+      </svg>
+      <div class="grip-name" id="gripNamePalm">Palm Grip</div>
+      <div class="grip-desc" id="gripDescPalm">อุ้งมือแนบสนิท นิ่ง แน่น แขนนำ</div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="btnLaunch" onclick="initBenchmark()">เริ่มบททดสอบประเมินค่า 5 มิติ</button>
+
+  <!-- Interactive Test Arena -->
+  <div class="test-box" id="testBox">
+    <div class="arena-status">
+      <div>
+        <span class="badge" id="drillBadge">บททดสอบ 1/5: Micro Flick</span>
+        <span id="drillInstruction" style="margin-left: 12px; font-size: 13px; color: var(--text-muted);">คลิกเป้าเล็กให้แม่นยำที่สุด</span>
+      </div>
+      <div class="status-counter" id="statusCounter">0 / 10</div>
+    </div>
+    <canvas id="canvas" width="788" height="320"></canvas>
+    <div class="progress-bar-wrap" id="trackProgressWrap" style="display: none;">
+      <div class="progress-bar-fill" id="trackProgressBar"></div>
+    </div>
+  </div>
+
+  <!-- Calibration Results Dashboard -->
+  <div class="result-card" id="resultCard">
+    <h3 id="resHeading">ผลการวิเคราะห์ Sensitivity ที่แนะนำ</h3>
+    <div class="results-matrix">
+      <div class="matrix-box">
+        <div class="label">VALORANT Sensitivity</div>
+        <div class="value val-val" id="resValSens">0.000</div>
+      </div>
+      <div class="matrix-box">
+        <div class="label">CS2 / CS:GO Sensitivity</div>
+        <div class="value val-cs" id="resCsSens">0.000</div>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <span id="lblResEdpi">Effective DPI (eDPI)</span>
+      <span id="resEdpi" style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">-</span>
+    </div>
+    <div class="meta-row">
+      <span id="lblResTurn">ระยะหมุน 360° รอบตัว</span>
+      <span id="resTurnDistance" style="font-family: 'JetBrains Mono', monospace;">-</span>
+    </div>
+    <div class="meta-row">
+      <span id="lblResDiag">รายงานผล 5 บททดสอบ</span>
+      <span id="resDiagnostics" style="color: var(--text-muted); text-align: right;">-</span>
+    </div>
+    <div class="meta-row">
+      <span id="lblResAdjust">ข้อสรุปการปรับจูน</span>
+      <span id="resFeedback" style="color: #4ade80; font-weight: 500; text-align: right;">-</span>
+    </div>
+  </div>
+
+  <!-- Source References & Credits -->
+  <div class="credits-footer">
+    <span style="color: var(--accent-pete); font-weight: 600;">Sensora Engine by Pete1Tap</span>
+    <span>•</span>
+    <span id="lblCredits">เกณฑ์มาตรฐานอ้างอิงสถิติ:</span>
+    <a href="https://prosettings.net/games/valorant/" target="_blank" rel="noopener noreferrer">ProSettings VALORANT</a>
+    <span>•</span>
+    <a href="https://prosettings.net/lists/cs2/" target="_blank" rel="noopener noreferrer">ProSettings CS2</a>
+  </div>
+</div>
+
+<script>
+  let currentLang = "th";
+  let selectedGrip = "claw";
+  let baseValSens = 0.312;
+  let currentStage = 1;
+  let stageCount = 0;
+
+  const i18n = {
+    th: {
+      subTitle: "ระบบวิเคราะห์ Sensitivity เฉพาะบุคคลด้วยฮาร์ดแวร์และการทดสอบ 5 มิติ",
+      tagEngine: "ระบบทดสอบ 5 มิติ",
+      lblDpi: "Mouse DPI",
+      lblPivot: "การใช้แขน / ข้อมือ (Pivot Style)",
+      pivotArm: "Arm Aiming (ใช้ท่อนแขน - นิ่ง แน่น)",
+      pivotHybrid: "Hybrid (แขนมุมกว้าง + ข้อมือสะบัด)",
+      pivotWrist: "Wrist Aiming (ข้อมือล้วน - คล่องตัว)",
+      lblGame: "เกมหลักที่ต้องการตั้งค่า",
+      gameVal: "VALORANT (Micro-Aim / First Bullet)",
+      gameCs: "CS2 (Recoil Spray / Dynamic Strafe)",
+      lblGrip: "เลือกลักษณะการจับเมาส์ (Mouse Grip):",
+      gripNameFingertip: "Fingertip Grip",
+      gripDescFingertip: "ปลายนิ้วสัมผัสล้วน ฝ่ามือลอย สะบัดไว",
+      gripNameClaw: "Claw Grip",
+      gripDescClaw: "นิ้วงอแตะ โคนฝ่ามือประคอง สมดุล",
+      gripNamePalm: "Palm Grip",
+      gripDescPalm: "อุ้งมือแนบสนิท นิ่ง แน่น แขนนำ",
+      btnLaunch: "เริ่มบททดสอบประเมินค่า 5 มิติ",
+      resHeading: "ผลการวิเคราะห์ Sensitivity ที่แนะนำ",
+      lblResEdpi: "Effective DPI (eDPI)",
+      lblResTurn: "ระยะหมุน 360° รอบตัว",
+      lblResDiag: "รายงานผล 5 บททดสอบ",
+      lblResAdjust: "ข้อสรุปการปรับจูน",
+      lblCredits: "เกณฑ์มาตรฐานอ้างอิงสถิติ:",
+      drills: {
+        1: { badge: "บททดสอบ 1/5: Micro Flick", desc: "คลิกเป้าเล็กให้แม่นยำที่สุด (วัดความละเอียดข้อมือ)" },
+        2: { badge: "บททดสอบ 2/5: Wide Flick", desc: "สะบัดเมาส์ระยะไกลข้ามฝั่งหน้าจอ" },
+        3: { badge: "บททดสอบ 3/5: Smooth Tracking", desc: "เลี้ยงเมาส์ให้อยู่ในเป้าที่เลื่อนซ้าย-ขวาอย่างสม่ำเสมอ" },
+        4: { badge: "บททดสอบ 4/5: Reactive Strafe", desc: "เกาะเป้าที่สุ่มเปลี่ยนทิศทางกะทันหัน (Dynamic Strafe)" },
+        5: { badge: "บททดสอบ 5/5: Rapid Switching", desc: "คลิกเก็บเป้าที่ขึ้นพร้อมกันให้หมดโดยเร็ว" }
+      },
+      feedback: {
+        microOver: "Over-shoot เป้าเล็ก (-6% Sens เพื่อเพิ่มความนิ่งของเม็ดแรก)",
+        wideErr: "สะบัดมุมกว้างคลาดเคลื่อน (-4% Sens)",
+        smoothLow: "เลี้ยงเป้าสั่น (-7% Sens เพื่อความเสถียร)",
+        reactiveAgility: "ตอบสนองต่อการเปลี่ยนทิศทางช้า (+3% Sens เพื่อความคล่องตัว)",
+        balanced: "การควบคุมมีความสมดุลสูงและเข้ากับสรีระได้ดีเยี่ยม"
+      }
+    },
+    en: {
+      subTitle: "Custom DPI & Multi-Drill Micro-Sens Calibration Tool",
+      tagEngine: "5-Stage Engine",
+      lblDpi: "Hardware DPI",
+      lblPivot: "Pivot Style (Arm / Wrist)",
+      pivotArm: "Arm Aiming (Forearm pivot - Maximum Stability)",
+      pivotHybrid: "Hybrid (Forearm glide + Wrist micro-flick)",
+      pivotWrist: "Wrist Aiming (Wrist pivot - High Agility)",
+      lblGame: "Target Game Discipline",
+      gameVal: "VALORANT (Micro-Corrections / Headshots)",
+      gameCs: "CS2 (Recoil Spray / Dynamic Strafe)",
+      lblGrip: "Select Grip Ergonomics:",
+      gripNameFingertip: "Fingertip Grip",
+      gripDescFingertip: "Finger-only contact, high wrist speed",
+      gripNameClaw: "Claw Grip",
+      gripDescClaw: "Arched fingers, palm stabilized base",
+      gripNamePalm: "Palm Grip",
+      gripDescPalm: "Full surface contact, forearm tracking",
+      btnLaunch: "Launch 5-Stage Aim Calibration",
+      resHeading: "Recommended Sensitivity Profiles",
+      lblResEdpi: "Effective DPI (eDPI)",
+      lblResTurn: "Physical Turn Circumference",
+      lblResDiag: "Drill Diagnostics",
+      lblResAdjust: "Calibration Adjustments",
+      lblCredits: "Data Benchmarks:",
+      drills: {
+        1: { badge: "Drill 1/5: Micro Flick", desc: "Hit compact targets precision-first" },
+        2: { badge: "Drill 2/5: Wide Flick", desc: "Flick cross-screen across edges" },
+        3: { badge: "Drill 3/5: Smooth Tracking", desc: "Keep cursor centered on linear glide" },
+        4: { badge: "Drill 4/5: Reactive Strafe", desc: "Track rapid directional strafe switches" },
+        5: { badge: "Drill 5/5: Rapid Switching", desc: "Clear simultaneous targets sequentially" }
+      },
+      feedback: {
+        microOver: "Over-shooting micro targets (-6% Sens for First-Shot accuracy)",
+        wideErr: "Edge-flick variance detected (-4% Sens)",
+        smoothLow: "Jittery linear tracking (-7% Sens for smoothness)",
+        reactiveAgility: "Under-tracking quick direction cuts (+3% Sens for agility)",
+        balanced: "Highly optimized mechanical equilibrium across all disciplines."
+      }
+    }
+  };
+
+  function toggleLanguage(forceState) {
+    if (typeof forceState === "boolean") {
+      currentLang = forceState ? "en" : "th";
+    } else {
+      currentLang = (currentLang === "th") ? "en" : "th";
+    }
+
+    const isEn = (currentLang === "en");
+    document.getElementById("langSwitch").classList.toggle("checked", isEn);
+    document.getElementById("lbl-th").classList.toggle("active", !isEn);
+    document.getElementById("lbl-en").classList.toggle("active", isEn);
+
+    applyLanguageStrings();
+  }
+
+  function applyLanguageStrings() {
+    const t = i18n[currentLang];
+    document.getElementById("subTitle").innerText = t.subTitle;
+    document.getElementById("tagEngine").innerText = t.tagEngine;
+    document.getElementById("lblDpi").innerText = t.lblDpi;
+    document.getElementById("lblPivot").innerText = t.lblPivot;
+    document.getElementById("lblGame").innerText = t.lblGame;
+    document.getElementById("lblGrip").innerText = t.lblGrip;
+    
+    document.getElementById("gripNameFingertip").innerText = t.gripNameFingertip;
+    document.getElementById("gripDescFingertip").innerText = t.gripDescFingertip;
+    document.getElementById("gripNameClaw").innerText = t.gripNameClaw;
+    document.getElementById("gripDescClaw").innerText = t.gripDescClaw;
+    document.getElementById("gripNamePalm").innerText = t.gripNamePalm;
+    document.getElementById("gripDescPalm").innerText = t.gripDescPalm;
+    document.getElementById("btnLaunch").innerText = t.btnLaunch;
+
+    document.getElementById("resHeading").innerText = t.resHeading;
+    document.getElementById("lblResEdpi").innerText = t.lblResEdpi;
+    document.getElementById("lblResTurn").innerText = t.lblResTurn;
+    document.getElementById("lblResDiag").innerText = t.lblResDiag;
+    document.getElementById("lblResAdjust").innerText = t.lblResAdjust;
+    document.getElementById("lblCredits").innerText = t.lblCredits;
+
+    const pivotSelect = document.getElementById("aimPivot");
+    pivotSelect.options[0].text = t.pivotArm;
+    pivotSelect.options[1].text = t.pivotHybrid;
+    pivotSelect.options[2].text = t.pivotWrist;
+
+    const gameSelect = document.getElementById("primaryGame");
+    gameSelect.options[0].text = t.gameVal;
+    gameSelect.options[1].text = t.gameCs;
+
+    if (document.getElementById("testBox").style.display === "block") {
+      updateDrillStatusText();
+    }
+  }
+
+  function updateDrillStatusText() {
+    const drillInfo = i18n[currentLang].drills[currentStage];
+    if (drillInfo) {
+      document.getElementById("drillBadge").innerText = drillInfo.badge;
+      document.getElementById("drillInstruction").innerText = drillInfo.desc;
+    }
+  }
+
+  let metrics = {
+    microErrors: [],
+    wideErrors: [],
+    smoothTrackScore: 0,
+    reactiveTrackScore: 0,
+    targetSwitchDuration: 0
+  };
+
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  let singleTarget = null;
+  let activeMultiTargets = [];
+  let trackingTarget = { x: 394, y: 160, r: 18, vx: 3.8, dir: 1 };
+  let trackingDuration = 6000;
+  let trackingStartTime = null;
+  let trackingHitFrames = 0;
+  let trackingTotalFrames = 0;
+  let mousePos = { x: -100, y: -100 };
+  let rafId = null;
+  let switchStartEpoch = 0;
+
+  function selectGrip(grip) {
+    selectedGrip = grip;
+    document.querySelectorAll(".grip-card").forEach(el => el.classList.remove("active"));
+    document.getElementById(`card-${grip}`).classList.add("active");
+  }
+
+  function initBenchmark() {
+    const dpi = parseFloat(document.getElementById("dpi").value) || 800;
+    const pivot = document.getElementById("aimPivot").value;
+
+    // 1. คำนวณ Base eDPI ร่วมกันระหว่าง Grip Style และ Pivot Style
+    let pivotWeight = (pivot === "arm") ? 210 : (pivot === "wrist") ? 330 : 260;
+    let gripWeight = (selectedGrip === "palm") ? 215 : (selectedGrip === "fingertip") ? 320 : 265;
+    
+    // Average baseline eDPI
+    let baseEdpi = (pivotWeight * 0.55) + (gripWeight * 0.45);
+
+    baseValSens = baseEdpi / dpi;
+    metrics = { microErrors: [], wideErrors: [], smoothTrackScore: 0, reactiveTrackScore: 0, targetSwitchDuration: 0 };
+
+    document.getElementById("testBox").style.display = "block";
+    document.getElementById("resultCard").style.display = "none";
+    document.getElementById("trackProgressWrap").style.display = "none";
+
+    loadDrill(1);
+  }
+
+  function loadDrill(stage) {
+    currentStage = stage;
+    stageCount = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updateDrillStatusText();
+
+    if (stage === 1) {
+      document.getElementById("statusCounter").innerText = "0 / 10";
+      spawnMicro();
+    } else if (stage === 2) {
+      document.getElementById("statusCounter").innerText = "0 / 8";
+      spawnWide();
+    } else if (stage === 3) {
+      document.getElementById("statusCounter").innerText = "6.0s";
+      document.getElementById("trackProgressWrap").style.display = "block";
+      beginTracking(false);
+    } else if (stage === 4) {
+      document.getElementById("statusCounter").innerText = "6.0s";
+      document.getElementById("trackProgressWrap").style.display = "block";
+      beginTracking(true);
+    } else if (stage === 5) {
+      document.getElementById("statusCounter").innerText = "0 / 8";
+      document.getElementById("trackProgressWrap").style.display = "none";
+      switchStartEpoch = performance.now();
+      spawnSwitching();
+    }
+  }
+
+  function spawnMicro() {
+    if (stageCount >= 10) { loadDrill(2); return; }
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    singleTarget = {
+      x: cx + (Math.random() - 0.5) * 240,
+      y: cy + (Math.random() - 0.5) * 140,
+      r: 8
+    };
+    renderDot(singleTarget, "#ff4655");
+    document.getElementById("statusCounter").innerText = `${stageCount + 1} / 10`;
+  }
+
+  function spawnWide() {
+    if (stageCount >= 8) { loadDrill(3); return; }
+    const isLeft = stageCount % 2 === 0;
+    singleTarget = {
+      x: isLeft ? 80 + Math.random() * 120 : canvas.width - 200 + Math.random() * 120,
+      y: 60 + Math.random() * (canvas.height - 120),
+      r: 12
+    };
+    renderDot(singleTarget, "#ff7b72");
+    document.getElementById("statusCounter").innerText = `${stageCount + 1} / 8`;
+  }
+
+  function renderDot(t, color) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+  }
+
+  function beginTracking(isReactive) {
+    trackingHitFrames = 0;
+    trackingTotalFrames = 0;
+    trackingStartTime = performance.now();
+    trackingTarget = { x: canvas.width / 2, y: canvas.height / 2, r: 18, vx: 4.0, dir: 1 };
+
+    function frame() {
+      const elapsed = performance.now() - trackingStartTime;
+      const progress = Math.min(100, (elapsed / trackingDuration) * 100);
+      document.getElementById("trackProgressBar").style.width = `${progress}%`;
+      document.getElementById("statusCounter").innerText = `${Math.max(0, (trackingDuration - elapsed) / 1000).toFixed(1)}s`;
+
+      if (isReactive && Math.random() < 0.04) trackingTarget.dir *= -1;
+      trackingTarget.x += trackingTarget.vx * trackingTarget.dir;
+      if (trackingTarget.x > canvas.width - 40) trackingTarget.dir = -1;
+      if (trackingTarget.x < 40) trackingTarget.dir = 1;
+
+      const dist = Math.hypot(mousePos.x - trackingTarget.x, mousePos.y - trackingTarget.y);
+      const isHit = dist <= trackingTarget.r;
+      trackingTotalFrames++;
+      if (isHit) trackingHitFrames++;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.arc(trackingTarget.x, trackingTarget.y, trackingTarget.r, 0, Math.PI * 2);
+      ctx.fillStyle = isHit ? "rgba(0, 229, 255, 0.35)" : "rgba(255, 255, 255, 0.06)";
+      ctx.fill();
+      ctx.strokeStyle = isHit ? "var(--accent-cs)" : "#64748b";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(trackingTarget.x, trackingTarget.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = isHit ? "var(--accent-cs)" : "#94a3b8";
+      ctx.fill();
+
+      if (elapsed < trackingDuration) {
+        rafId = requestAnimationFrame(frame);
+      } else {
+        const ratio = (trackingHitFrames / trackingTotalFrames) * 100;
+        if (!isReactive) {
+          metrics.smoothTrackScore = ratio;
+          loadDrill(4);
+        } else {
+          metrics.reactiveTrackScore = ratio;
+          loadDrill(5);
+        }
+      }
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function spawnSwitching() {
+    activeMultiTargets = [];
+    for (let i = 0; i < 3; i++) {
+      activeMultiTargets.push({
+        x: 60 + Math.random() * (canvas.width - 120),
+        y: 60 + Math.random() * (canvas.height - 120),
+        r: 11
+      });
+    }
+    drawMultiTargets();
+  }
+
+  function drawMultiTargets() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    activeMultiTargets.forEach(t => {
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#10b981";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+    });
+    document.getElementById("statusCounter").innerText = `${stageCount} / 8`;
+  }
+
+  canvas.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mousePos.x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    mousePos.y = (e.clientY - rect.top) * (canvas.height / rect.height);
+  });
+
+  canvas.addEventListener("mousedown", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    if (currentStage === 1 && singleTarget) {
+      metrics.microErrors.push(Math.hypot(cx - singleTarget.x, cy - singleTarget.y));
+      stageCount++;
+      spawnMicro();
+    } else if (currentStage === 2 && singleTarget) {
+      metrics.wideErrors.push(Math.hypot(cx - singleTarget.x, cy - singleTarget.y));
+      stageCount++;
+      spawnWide();
+    } else if (currentStage === 5) {
+      const idx = activeMultiTargets.findIndex(t => Math.hypot(cx - t.x, cy - t.y) <= t.r + 4);
+      if (idx !== -1) {
+        activeMultiTargets.splice(idx, 1);
+        stageCount++;
+        if (stageCount >= 8) {
+          metrics.targetSwitchDuration = performance.now() - switchStartEpoch;
+          concludeCalibration();
+        } else {
+          activeMultiTargets.push({
+            x: 60 + Math.random() * (canvas.width - 120),
+            y: 60 + Math.random() * (canvas.height - 120),
+            r: 11
+          });
+          drawMultiTargets();
+        }
+      }
+    }
+  });
+
+  function concludeCalibration() {
+    cancelAnimationFrame(rafId);
+    document.getElementById("testBox").style.display = "none";
+    document.getElementById("resultCard").style.display = "block";
+
+    const dpi = parseFloat(document.getElementById("dpi").value) || 800;
+    const avgMicro = metrics.microErrors.reduce((a, b) => a + b, 0) / metrics.microErrors.length;
+    const avgWide = metrics.wideErrors.reduce((a, b) => a + b, 0) / metrics.wideErrors.length;
+    const fb = i18n[currentLang].feedback;
+
+    let multiplier = 1.0;
+    let feedback = [];
+
+    if (avgMicro > 12) {
+      multiplier *= 0.94;
+      feedback.push(fb.microOver);
+    }
+    if (avgWide > 22) {
+      multiplier *= 0.96;
+      feedback.push(fb.wideErr);
+    }
+    if (metrics.smoothTrackScore < 40) {
+      multiplier *= 0.93;
+      feedback.push(fb.smoothLow);
+    }
+    if (metrics.reactiveTrackScore < 35 && metrics.smoothTrackScore >= 50) {
+      multiplier *= 1.03;
+      feedback.push(fb.reactiveAgility);
+    }
+
+    const finalVal = Number((baseValSens * multiplier).toFixed(3));
+    const finalCs = Number((finalVal * 3.181818).toFixed(3));
+    const valEdpi = Math.round(dpi * finalVal);
+    const csEdpi = Math.round(dpi * finalCs);
+    const cm360 = (13030.5 / (dpi * finalVal)).toFixed(1);
+
+    document.getElementById("resValSens").innerText = finalVal;
+    document.getElementById("resCsSens").innerText = finalCs;
+    document.getElementById("resEdpi").innerText = `${valEdpi} (VAL) | ${csEdpi} (CS2)`;
+    document.getElementById("resTurnDistance").innerText = `~${cm360} cm / 360°`;
+    document.getElementById("resDiagnostics").innerHTML = 
+      `Micro Err: ${avgMicro.toFixed(1)}px • Wide: ${avgWide.toFixed(1)}px<br/>` +
+      `Smooth: ${metrics.smoothTrackScore.toFixed(0)}% • Reactive: ${metrics.reactiveTrackScore.toFixed(0)}%`;
+    document.getElementById("resFeedback").innerText = feedback.length ? feedback.join(" | ") : fb.balanced;
+  }
+</script>
+</body>
+</html>
